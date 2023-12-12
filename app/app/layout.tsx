@@ -65,13 +65,18 @@ export default async function RootLayout({
         - 
         - Use the newPrivateKey() function to generate a new private key for the user
     */
-
+    const privateKey = newPrivateKey();
+    const user = newUserSchema.parse({
+      username: form.get('username') as string,
+      name: form.get('name') as string,
+      privateKey,
+    });
     /* 
       TODO #3: Store the user in the local account cache
 
       HINT: Use the storeUser() function to store the user
     */
-
+     storeUser(user);
     /* 
       TODO #4: Set up a try catch block to create the user's profile and log them in if successful.
 
@@ -83,6 +88,14 @@ export default async function RootLayout({
           from the local account cache. Then, throw the error to be caught by the catch block in
           the loginWindow.tsx file.
     */
+    try {
+      await createProfile(user);
+      await login(user);
+    } catch (error) {
+      dropUser(user);
+      throw error;
+    }
+  }
   }
 
   if (!me) {
